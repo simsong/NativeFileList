@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Simson L. Garfinkel"
+		]
+	},
+	"native-file-list-desc": "NativeFileList is an extension that lists files in the native file system in response to a search request. The extension can create URLs that allow users to access these files directly, as well as wiki pages to discuss them. The wiki pages automatically have links to download the native files."
+}

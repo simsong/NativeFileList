@@ -1,0 +1,47 @@
+{
+	"name": "NativeFileList",
+	"author": [
+		"Simson Garfinkel"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:NativeFileList",
+	"descriptionmsg": "native-file-list-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.32.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\NativeFileList\\": "includes/"
+	},
+	"config": {
+		"NativeFileListEnableTalk": {
+			"description": "Enable the Talk feature for each file.",
+			"value": false
+		},
+		"NativeFileListVandalizeEachPage": {
+			"description": "Write 'NativeFileList was here' on each page",
+			"value": false
+		}
+	},
+	"Hooks": {
+	    "SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend"
+	},
+	"MessagesDirs": {
+		"NativeFileList": [
+			"i18n"
+		]
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "NativeFileList/resources"
+	},
+	"ResourceModules": {
+		"ext.boilerPlate": {
+			"dependencies": [],
+			"messages": [],
+			"styles": [],
+			"scripts": []
+		}
+	},
+	"manifest_version": 2
+}
