@@ -160,3 +160,17 @@ includes/OutputPage.php   class OutputPage
 
  
                           
+# Add these to LocalSettings.php for debugging:
+error_reporting( -1 );
+ini_set( 'display_startup_errors', 1 );
+ini_set( 'display_errors', 1 );
+
+$wgShowExceptionDetails=true;
+$wgDebugToolbar=true;
+$wgShowDebug=true;
+$wgDevelopmentWarnings=true;
+#$wgDebugDumpSql = true;
+$wgDebugLogFile = '/tmp/debug.log';
+#$wgDebugComments = true;
+$wgEnableParserCache = false;
+$wgCachePages = false;
