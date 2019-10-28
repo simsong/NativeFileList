@@ -28,21 +28,10 @@ class S3Info {
     public $bytes;
     public $filename; 
     
-    function __construct($line){
-	$this->datetime = substr($line, 0, 19);
-	$left = trim(substr($line, 20));
-	$rest = explode( " ", $left, 2 );
-	if ( count($rest) == 2) {
-	    $this->bytes    = $rest[0];
-	    $this->filename = $rest[1];
-	} else {
-	    $this->bytes    = 'n/a';
-	    $this->filename = 'n/a';
-	}
-    }
-
-    function match($term) {
-	return stripos( $this->filename, $term );
+    function __construct($datetime, $bytes, $filename){
+	$this->datetime = $datetime;
+	$this->bytes = $bytes;
+	$this->filename = $filename;
     }
 
     function tr() {
@@ -62,25 +51,31 @@ class Hooks {
      * @param $searchterm
      * @param $title - array of titles
      * Returns true false if something found, true otherwise.
+     * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
         $res = array();
-        $fp = fopen(FILE_INDEX,"r");
-        while ( !feof($fp)){
-            $v    = new S3Info( fgets($fp) );
-	    if ($v->match($term)) {
-		array_push($res, $v->tr() );
-		if ( count($res) > 100 ){
-		    array_push($res, "<tr><td colspan='3'>Only the first 100 hits are shown</td></tr>");
-		    break;
-                }
-            }
+	$dbr = wfGetDB( DB_REPLICA );
+	$q = $dbr->select("das_s3bucket", 
+			  array('mtime','bytes','filename'), 
+			  array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
+			  __METHOD__,
+			  array('LIMIT'=>100));
+	foreach ($q as $row) {
+            $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
+	    array_push($res, $v->tr() );
         }
+	if (count($res)==100){
+	    array_push($res, "<tr><td colspan='3'>Only the first 100 hits are shown</td></tr>");
+	}
+
         if ( count($res) == 0){
             if ($term){
                 $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
             }
-        } else {
+        } 
+
+	if ( count($res) > 0 ){
 	    $out->addHTML("<h3>S3 Search Results:</h3>");
             $out->addHTML("<table>");
             $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
