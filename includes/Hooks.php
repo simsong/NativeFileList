@@ -21,7 +21,39 @@ namespace MediaWiki\Extension\NativeFileList;
 
 use Title;
 
-const FILE_INDEX='/Users/simsong/Sites/filelist.txt';
+const FILE_INDEX='/var/www/html/filelist_s3.txt';
+
+class S3Info {
+    public $datetime;
+    public $bytes;
+    public $filename; 
+    
+    function __construct($line){
+	$this->datetime = substr($line, 0, 19);
+	$left = trim(substr($line, 20));
+	$rest = explode( " ", $left, 2 );
+	if ( count($rest) == 2) {
+	    $this->bytes    = $rest[0];
+	    $this->filename = $rest[1];
+	} else {
+	    $this->bytes    = 'n/a';
+	    $this->filename = 'n/a';
+	}
+    }
+
+    function match($term) {
+	return stripos( $this->filename, $term );
+    }
+
+    function tr() {
+	$talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
+	return "<tr><td class='nfl-date'>".$this->datetime."</td>".
+	    "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
+	    "<td class='nfl-filename'>".$this->filename."</td>".
+	    "<td><a class='new' href='" . $talk_url . "'>[Talk]</a></td>".
+	    "</tr>";
+    }
+}
 
 class Hooks {
     /**
@@ -32,23 +64,15 @@ class Hooks {
      * Returns true false if something found, true otherwise.
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
-        wfDebug('hello mom');
         $res = array();
         $fp = fopen(FILE_INDEX,"r");
-        $count = 0;
         while ( !feof($fp)){
-            $line = fgets($fp);
-            $v = explode("," , $line, 3);   // [0]==time_t, [1]==bytes, [2]==name
-            if ( count($v) == 3 ){
-                $name = $v[2];
-                if (stripos( $name, $term) ){
-                    $nt = str_replace("T"," ",date("c",$v[0]));
-                    $nt = str_replace("+00:00","",$nt);
-                    array_push($res,"<tr><td>".$nt."</td><td>".$v[1]."</td><td>".$v[2]."</td></tr>");
-                    $count = $count + 1;
-                    if ($count > 100){
-                        break;
-                    }
+            $v    = new S3Info( fgets($fp) );
+	    if ($v->match($term)) {
+		array_push($res, $v->tr() );
+		if ( count($res) > 100 ){
+		    array_push($res, "<tr><td colspan='3'>Only the first 100 hits are shown</td></tr>");
+		    break;
                 }
             }
         }
@@ -57,7 +81,7 @@ class Hooks {
                 $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
             }
         } else {
-            wfDebug("found ".count($res));
+	    $out->addHTML("<h3>S3 Search Results:</h3>");
             $out->addHTML("<table>");
             $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
             foreach ($res as $row){

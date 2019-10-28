@@ -39,7 +39,7 @@
 		"ext.boilerPlate": {
 			"dependencies": [],
 			"messages": [],
-			"styles": [],
+			"styles": ["modules/NativeFileList.css"],
 			"scripts": []
 		}
 	},
