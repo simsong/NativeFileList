@@ -141,3 +141,22 @@ use MediaWiki\Widget\Search\SimpleSearchResultSetWidget;
 
 		Hooks::run( 'SpecialSearchResultsAppend', [ $this, $out, $term ] );
 
+
+
+output is done by:
+
+includes/OutputPage.php   class OutputPage
+ addHeadItem(name,value)
+ addHeadItems( $values)
+ addBodyClasses( $classes )
+ addSubtitle( )
+ addHTML( $text );
+ addElement( $element, array $attribs = [], $contents = '')
+ addWikiText( $text, $linestart-true, $interface=true);
+ addWikiTextWithTitle()
+ addMeta
+ addLink
+ addScript
+
+ 
+                          
