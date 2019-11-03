@@ -1,17 +1,15 @@
-https://www.mediawiki.org/wiki/Manual:Developing_extensions
-https://www.mediawiki.org/wiki/Extension:Example
-https://www.mediawiki.org/wiki/Extension:BoilerPlate
-https://www.mediawiki.org/wiki/Manual:Hooks
-
-https://www.mediawiki.org/wiki/Extension:CirrusSearch
-https://www.mediawiki.org/wiki/Manual:Coding_conventions
-https://www.mediawiki.org/wiki/Best_practices_for_extensions
-
-https://www.mediawiki.org/wiki/Manual:How_to_debug
-https://www.mediawiki.org/wiki/Manual:$wgDebugLogFile
-https://www.siteground.com/kb/how_to_set_my_mediawiki_in_debug_mode/
-
-https://www.mediawiki.org/wiki/Manual:Structured_logging
+# Useful Web Pages I found
+* https://www.mediawiki.org/wiki/Manual:Developing_extensions
+* https://www.mediawiki.org/wiki/Extension:Example
+* https://www.mediawiki.org/wiki/Extension:BoilerPlate
+* https://www.mediawiki.org/wiki/Manual:Hooks
+* https://www.mediawiki.org/wiki/Extension:CirrusSearch
+* https://www.mediawiki.org/wiki/Manual:Coding_conventions
+* https://www.mediawiki.org/wiki/Best_practices_for_extensions
+* https://www.mediawiki.org/wiki/Manual:How_to_debug
+* https://www.mediawiki.org/wiki/Manual:$wgDebugLogFile
+* https://www.siteground.com/kb/how_to_set_my_mediawiki_in_debug_mode/
+* https://www.mediawiki.org/wiki/Manual:Structured_logging
 
 
 # For MediaWiki  1.30 and later:
@@ -29,13 +27,14 @@ https://www.mediawiki.org/wiki/API:Extensions
 * Testing your extension
   Visit api.php
   Visit Special:ApiSandbox
-  aVisit pi.php?action=paraminfo&modules=myext 
+  Visit pi.php?action=paraminfo&modules=myext 
 
 For loading CSS, JavaScript, and other browser things:
 
 https://www.mediawiki.org/wiki/ResourceLoader
 
 # These are the hooks that are defined
+```
 SearchEngine::completionSearchBackend
 SearchAfterNoDirectMatch
 SearchGetNearMatch
@@ -57,6 +56,7 @@ SpecialSearchResults
 SpecialSearchResultsPrepend
 SpecialSearchResultsAppend
 SpecialSearchSetupEngine
+```
 
 https://www.mediawiki.org/wiki/Manual:Hooks/SearchAfterNoDirectMatch
  -- Returns a single page that is close to the requested page
@@ -92,6 +92,7 @@ https://www.mediawiki.org/wiki/Manual:Cache
 SearchNearMatcher.php  :: SearchNearMatcher::getNearMatch()
 
 Creating responses - in wiki/includes/Title.php
+```
 use Title
 newFromText( $title, $defualtNamespace = NS_MAIN); -- Returns the title handle for a term that exists given text.
   $title->isSpecialPage()
@@ -103,9 +104,7 @@ newFromIDs( $id, $flags=0);
 
 $page = WikiPage::factory ( $title ) - returns page
   $page->hasViewableContent()
-  
-
-
+```  
 
 Better things to hook:
 
@@ -123,6 +122,7 @@ Special:Search - generated in includes/specials/SpecialSearch.php:
 
 references:
 
+```
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Widget\Search\BasicSearchResultSetWidget;
 use MediaWiki\Widget\Search\FullSearchResultWidget;
@@ -140,11 +140,12 @@ use MediaWiki\Widget\Search\SimpleSearchResultSetWidget;
        in showResults( $term ):
 
 		Hooks::run( 'SpecialSearchResultsAppend', [ $this, $out, $term ] );
-
+```
 
 
 output is done by:
 
+```
 includes/OutputPage.php   class OutputPage
  addHeadItem(name,value)
  addHeadItems( $values)
@@ -157,10 +158,11 @@ includes/OutputPage.php   class OutputPage
  addMeta
  addLink
  addScript
-
+```
  
                           
 # Add these to LocalSettings.php for debugging:
+```
 error_reporting( -1 );
 ini_set( 'display_startup_errors', 1 );
 ini_set( 'display_errors', 1 );
@@ -174,3 +176,4 @@ $wgDebugLogFile = '/tmp/debug.log';
 #$wgDebugComments = true;
 $wgEnableParserCache = false;
 $wgCachePages = false;
+```
