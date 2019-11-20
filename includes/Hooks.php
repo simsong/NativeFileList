@@ -62,7 +62,8 @@ class Hooks {
         echo 'Starting Special Search\n';
         $res = array();
         $dbr = wfGetDB( DB_REPLICA );
-        $q = $dbr->select("das_s3bucket.files, das_s3bucket.filenames", 
+        $q = $dbr->select(
+                array('das_s3bucket.files', 'das_s3bucket.filenames'), 
                 array('fileid','mtime','size','filename'), 
                 array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
                 __METHOD__,
@@ -74,8 +75,8 @@ class Hooks {
                 $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
             array_push($res, $v->tr() );
             }
-        if (count($res)==100){
-            array_push($res, "<tr><td colspan='3'>Only the first 100 hits are shown</td></tr>");
+        if (count($res)==(int)constant("SEARCH_LIMIT")){
+            array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
         }
 
             if ( count($res) == 0){
