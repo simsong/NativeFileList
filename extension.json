@@ -24,7 +24,8 @@
 		}
 	},
 	"Hooks": {
-	    "SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend"
+		"SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend",
+		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\NativeFileList\\Hooks::onLoadExtensionSchemaUpdates"
 	},
 	"MessagesDirs": {
 		"NativeFileList": [
