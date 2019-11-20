@@ -24,6 +24,9 @@ use DatabaseUpdater;
 
 const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
+// CONSTANTS
+define('SEARCH_LIMIT', '100');
+
 class S3Info {
     public $datetime;
     public $bytes;
@@ -46,6 +49,7 @@ class S3Info {
 }
 
 class Hooks {
+
     /**
      * @see https://www.mediawiki.org/wiki/Manual:Hooks/SearchAfterNoDirectMatch
      * @called from https://gerrit.wikimedia.org/g/mediawiki/core/+/master/includes/search/SearchNearMatcher.php
@@ -55,14 +59,17 @@ class Hooks {
      * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
-        echo 'Starting Special Search';
+        echo 'Starting Special Search\n';
         $res = array();
         $dbr = wfGetDB( DB_REPLICA );
-        $q = $dbr->select("das_s3bucket.files", 
-                array('mtime','bytes','filename'), 
+        $q = $dbr->select("das_s3bucket.files, das_s3bucket.filenames", 
+                array('fileid','mtime','size','filename'), 
                 array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
                 __METHOD__,
-                array('LIMIT'=>100));
+                array('LIMIT' => constant("SEARCH_LIMIT")),
+                array(
+                    'fileid' => array( 'NATURAL JOIN' )
+                ));
         foreach ($q as $row) {
                 $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
             array_push($res, $v->tr() );
