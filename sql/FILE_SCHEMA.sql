@@ -2,58 +2,58 @@
 CREATE DATABASE IF NOT EXISTS `das_s3bucket`;
 
 -- Create the metadata table
-DROP TABLE IF EXISTS `das_s3bucket`.metadata;
-CREATE TABLE  `das_s3bucket`.metadata (name VARCHAR(255) PRIMARY KEY, value VARCHAR(255) NOT NULL);
+DROP TABLE IF EXISTS /*_*/metadata;
+CREATE TABLE  /*_*/metadata (name VARCHAR(255) PRIMARY KEY, value VARCHAR(255) NOT NULL);
 
 -- Create the roots table
-DROP TABLE IF EXISTS `das_s3bucket`.roots;
-CREATE TABLE `das_s3bucket`.roots (rootid INTEGER PRIMARY KEY AUTO_INCREMENT, rootdir VARCHAR(255) NOT NULL);
+DROP TABLE IF EXISTS /*_*/roots;
+CREATE TABLE /*_*/roots (rootid INTEGER PRIMARY KEY AUTO_INCREMENT, rootdir VARCHAR(255) NOT NULL);
 
 -- Create dirnames table
-DROP TABLE IF EXISTS `das_s3bucket`.dirnames;
-CREATE TABLE  `das_s3bucket`.dirnames (dirnameid INTEGER PRIMARY KEY AUTO_INCREMENT,dirname TEXT(65536));
-CREATE UNIQUE INDEX  dirnames_idx2 ON `das_s3bucket`.dirnames (dirname(700));
+DROP TABLE IF EXISTS /*_*/dirnames;
+CREATE TABLE  /*_*/dirnames (dirnameid INTEGER PRIMARY KEY AUTO_INCREMENT,dirname TEXT(65536));
+CREATE UNIQUE INDEX  /*i*/dirnames_idx2 ON /*_*/dirnames (dirname(700));
 
 -- Create the filenames table
-DROP TABLE IF EXISTS `das_s3bucket`.filenames;
-CREATE TABLE  `das_s3bucket`.filenames (filenameid INTEGER PRIMARY KEY AUTO_INCREMENT,filename TEXT(65536));
-CREATE INDEX  filenames_idx2 ON `das_s3bucket`.filenames (filename(700));
+DROP TABLE IF EXISTS /*_*/filenames;
+CREATE TABLE  /*_*/filenames (filenameid INTEGER PRIMARY KEY AUTO_INCREMENT,filename TEXT(65536));
+CREATE INDEX  /*i*/filenames_idx2 ON /*_*/filenames (filename(700));
 
 -- Creates the paths table
-DROP TABLE IF EXISTS `das_s3bucket`.paths;
-CREATE TABLE  `das_s3bucket`.paths (pathid INTEGER PRIMARY KEY AUTO_INCREMENT,
-       dirnameid INTEGER REFERENCES `das_s3bucket`.dirnames(dirnameid),
-       filenameid INTEGER REFERENCES `das_s3bucket`.filenames(filenameid));
-CREATE INDEX  paths_idx2 ON `das_s3bucket`.paths(dirnameid);
-CREATE INDEX  paths_idx3 ON `das_s3bucket`.paths(filenameid);
+DROP TABLE IF EXISTS /*_*/paths;
+CREATE TABLE  /*_*/paths (pathid INTEGER PRIMARY KEY AUTO_INCREMENT,
+       dirnameid INTEGER REFERENCES /*_*/dirnames(dirnameid),
+       filenameid INTEGER REFERENCES /*_*/filenames(filenameid));
+CREATE INDEX  /*i*/paths_idx2 ON /*_*/.paths(dirnameid);
+CREATE INDEX  /*i*/paths_idx3 ON /*_*/(filenameid);
 
 -- Creates hashes table
-DROP TABLE IF EXISTS `das_s3bucket`.hashes;
-CREATE TABLE  `das_s3bucket`.hashes (hashid INTEGER PRIMARY KEY AUTO_INCREMENT,hash TEXT(65536) NOT NULL);
-CREATE INDEX  hashes_idx2 ON `das_s3bucket`.hashes( hash(700));
+DROP TABLE IF EXISTS /*_*/hashes;
+CREATE TABLE  /*_*/hashes (hashid INTEGER PRIMARY KEY AUTO_INCREMENT,hash TEXT(65536) NOT NULL);
+CREATE INDEX  /*i*/hashes_idx2 ON /*_*/hashes( hash(700));
 
 -- Creates the scanes table
-DROP TABLE IF EXISTS `das_s3bucket`.scans;
-CREATE TABLE  `das_s3bucket`.scans (scanid INTEGER PRIMARY KEY AUTO_INCREMENT,
+DROP TABLE IF EXISTS /*_*/scans;
+CREATE TABLE  /*_*/scans (scanid INTEGER PRIMARY KEY AUTO_INCREMENT,
                                       rootid INTEGER REFERENCES roots(rootid),
                                       time DATETIME NOT NULL UNIQUE,
                                       duration INTEGER);
-CREATE INDEX  scans_idx1 ON `das_s3bucket`.scans(scanid);
-CREATE INDEX  scans_idx2 ON `das_s3bucket`.scans(time);
+CREATE INDEX  /*i*/scans_idx1 ON /*_*/scans(scanid);
+CREATE INDEX  /*i*/scans_idx2 ON /*_*/scans(time);
 
--- Creates the files table
-DROP TABLE IF EXISTS `das_s3bucket`.files;
-CREATE TABLE  `das_s3bucket`.files (fileid INTEGER PRIMARY KEY AUTO_INCREMENT,
+-- Creates the files
+DROP TABLE IF EXISTS /*_*/files;
+CREATE TABLE  /*_*/files (fileid INTEGER PRIMARY KEY AUTO_INCREMENT,
                                   pathid INTEGER REFERENCES paths(pathid),
                                   rootid INTEGER REFERENCES roots(rootid),
                                   mtime INTEGER NOT NULL, 
                                   size INTEGER NOT NULL, 
                                   hashid INTEGER REFERENCES hashes(hashid), 
                                   scanid INTEGER REFERENCES scans(scanid));
-CREATE INDEX  files_idx1 ON `das_s3bucket`.files(pathid);
-CREATE INDEX  files_idx2 ON `das_s3bucket`.files(rootid);
-CREATE INDEX  files_idx3 ON `das_s3bucket`.files(mtime);
-CREATE INDEX  files_idx4 ON `das_s3bucket`.files(size);
-CREATE INDEX  files_idx5 ON `das_s3bucket`.files(hashid);
-CREATE INDEX  files_idx6 ON `das_s3bucket`.files(scanid);
-CREATE INDEX  files_idx7 ON `das_s3bucket`.files(scanid,hashid);
+CREATE INDEX  /*i*/files_idx1 ON /*_*/files(pathid);
+CREATE INDEX  /*i*/files_idx2 ON /*_*/files(rootid);
+CREATE INDEX  /*i*/files_idx3 ON /*_*/files(mtime);
+CREATE INDEX  /*i*/files_idx4 ON /*_*/files(size);
+CREATE INDEX  /*i*/files_idx5 ON /*_*/files(hashid);
+CREATE INDEX  /*i*/files_idx6 ON /*_*/files(scanid);
+CREATE INDEX  /*i*/files_idx7 ON /*_*/files(scanid,hashid);

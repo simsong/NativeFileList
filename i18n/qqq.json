@@ -4,5 +4,8 @@
 			"Your Name"
 		]
 	},
-	"boilerplate-desc": "{{desc|name=Boilerplate|url=https://www.mediawiki.org/wiki/Extension:Boilerplate}}"
+	"boilerplate-desc": "{{desc|name=Boilerplate|url=https://www.mediawiki.org/wiki/Extension:Boilerplate}}",
+	"NativeFileList": "Native File List",
+	"NativeFileList-desc": "{{desc}}",
+	"NativeFileList-summary": "Description"
 }

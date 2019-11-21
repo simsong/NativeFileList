@@ -100,7 +100,8 @@ class Hooks {
     /**
      * @see https://stackoverflow.com/questions/58680500/proper-way-to-create-new-sql-table-in-a-mediawiki-extension/58683843#58683843
      * @called from https://www.mediawiki.org/wiki/Manual:Hooks/LoadExtensionSchemaUpdates
-     * @param $updater
+     * @param $updater - Database Updater
+     * 
      * Fired when MediaWiki is updated to allow extensions to update the database
      * 
      * This hook is activated when you run:
@@ -108,13 +109,10 @@ class Hooks {
      */
 
     public static function onLoadExtensionSchemaUpdates( $updater ) {
-        // print "onLoadExtensionSchemaUpdates\n";
-        // add metadata table if not exists
+        // runs entire script
         $updater->addExtensionTable(
             'das',
             dirname ( __DIR__ ) . '/sql/FILE_SCHEMA.sql'
         );
-        
-        // print "Finished setting up file tables!\n";
     }
 }
