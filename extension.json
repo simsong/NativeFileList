@@ -13,6 +13,11 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\NativeFileList\\": "includes/"
 	},
+	"AutoloadClasses": {
+		"NativeFilesRecentlyAdded": "includes/NativeFilesRecentlyAdded.php",
+		"NativeFilesRecentlyChanged": "includes/NativeFilesRecentlyChanged.php",
+		"NativeFilesRecentlyDeleted": "includes/NativeFilesRecentlyDeleted.php"
+	},
 	"config": {
 		"NativeFileListEnableTalk": {
 			"description": "Enable the Talk feature for each file.",
@@ -24,12 +29,24 @@
 		}
 	},
 	"Hooks": {
-	    "SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend"
+		"SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend",
+		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\NativeFileList\\Hooks::onLoadExtensionSchemaUpdates"
 	},
+	"SpecialPages": {
+		"NativeFilesRecentlyAdded": "NativeFilesRecentlyAdded",
+		"NativeFilesRecentlyChanged": "NativeFilesRecentlyChanged",
+		"NativeFilesRecentlyDeleted": "NativeFilesRecentlyDeleted"
+	},
+	"AvailableRights": [
+		"nativefilelist-right"
+	],
 	"MessagesDirs": {
 		"NativeFileList": [
 			"i18n"
 		]
+	},
+	"ExtensionMessagesFiles": {
+		"NativeFileListAlias": "i18n/NativeFileList.i18n.alias.php"
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",

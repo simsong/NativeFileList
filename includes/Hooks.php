@@ -20,8 +20,12 @@
 namespace MediaWiki\Extension\NativeFileList;
 
 use Title;
+use DatabaseUpdater;
 
 const FILE_INDEX='/var/www/html/filelist_s3.txt';
+
+// CONSTANTS
+define('SEARCH_LIMIT', '100');
 
 class S3Info {
     public $datetime;
@@ -45,6 +49,7 @@ class S3Info {
 }
 
 class Hooks {
+
     /**
      * @see https://www.mediawiki.org/wiki/Manual:Hooks/SearchAfterNoDirectMatch
      * @called from https://gerrit.wikimedia.org/g/mediawiki/core/+/master/includes/search/SearchNearMatcher.php
@@ -54,36 +59,60 @@ class Hooks {
      * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
+        echo 'Starting Special Search\n';
         $res = array();
-	$dbr = wfGetDB( DB_REPLICA );
-	$q = $dbr->select("das_s3bucket", 
-			  array('mtime','bytes','filename'), 
-			  array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
-			  __METHOD__,
-			  array('LIMIT'=>100));
-	foreach ($q as $row) {
-            $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
-	    array_push($res, $v->tr() );
-        }
-	if (count($res)==100){
-	    array_push($res, "<tr><td colspan='3'>Only the first 100 hits are shown</td></tr>");
-	}
-
-        if ( count($res) == 0){
-            if ($term){
-                $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
+        $dbr = wfGetDB( DB_REPLICA );
+        $q = $dbr->select(
+                array('das_s3bucket.files', 'das_s3bucket.filenames'), 
+                array('fileid','mtime','size','filename'), 
+                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
+                __METHOD__,
+                array('LIMIT' => constant("SEARCH_LIMIT")),
+                array(
+                    'fileid' => array( 'NATURAL JOIN' )
+                ));
+        foreach ($q as $row) {
+                $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
+            array_push($res, $v->tr() );
             }
-        } 
-
-	if ( count($res) > 0 ){
-	    $out->addHTML("<h3>S3 Search Results:</h3>");
-            $out->addHTML("<table>");
-            $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
-            foreach ($res as $row){
-                $out->addHTML($row);
-            }
-            $out->addHTML("</table>");
+        if (count($res)==(int)constant("SEARCH_LIMIT")){
+            array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
         }
+
+            if ( count($res) == 0){
+                if ($term){
+                    $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
+                }
+            } 
+
+        if ( count($res) > 0 ){
+            $out->addHTML("<h3>S3 Search Results:</h3>");
+                $out->addHTML("<table>");
+                $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
+                foreach ($res as $row){
+                    $out->addHTML($row);
+                }
+                $out->addHTML("</table>");
+            }
+    }
+
+
+    /**
+     * @see https://stackoverflow.com/questions/58680500/proper-way-to-create-new-sql-table-in-a-mediawiki-extension/58683843#58683843
+     * @called from https://www.mediawiki.org/wiki/Manual:Hooks/LoadExtensionSchemaUpdates
+     * @param $updater - Database Updater
+     * 
+     * Fired when MediaWiki is updated to allow extensions to update the database
+     * 
+     * This hook is activated when you run:
+     * $ php maintenance/update.php
+     */
+
+    public static function onLoadExtensionSchemaUpdates( $updater ) {
+        // runs entire script
+        $updater->addExtensionTable(
+            'das',
+            dirname ( __DIR__ ) . '/sql/FILE_SCHEMA.sql'
+        );
     }
 }
-
