@@ -18,6 +18,7 @@
 		"NativeFilesRecentlyChanged": "includes/NativeFilesRecentlyChanged.php",
 		"NativeFilesRecentlyDeleted": "includes/NativeFilesRecentlyDeleted.php"
 	},
+	"config_prefix": "nfl",
 	"config": {
 		"NativeFileListEnableTalk": {
 			"description": "Enable the Talk feature for each file.",
@@ -26,7 +27,15 @@
 		"NativeFileListVandalizeEachPage": {
 			"description": "Write 'NativeFileList was here' on each page",
 			"value": false
+		},
+		"DBPrefix": {
+			"value": "nfl_",
+			"description": "Prefix setting for the database name",
+			"public": true
 		}
+	},
+	"ConfigRegistry": {
+		"NativeFileList": "GlobalVarConfig::newInstance"
 	},
 	"Hooks": {
 		"SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend",

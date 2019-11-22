@@ -21,6 +21,7 @@ namespace MediaWiki\Extension\NativeFileList;
 
 use Title;
 use DatabaseUpdater;
+use MediaWiki\MediaWikiServices;
 
 const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
@@ -109,6 +110,10 @@ class Hooks {
      */
 
     public static function onLoadExtensionSchemaUpdates( $updater ) {
+        //GET CONFIG -> DBPREFIX
+        // $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
+        echo $nflDBPrefix . "\n";
+
         // runs entire script
         $updater->addExtensionTable(
             'das',
