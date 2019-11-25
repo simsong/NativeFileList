@@ -110,16 +110,18 @@ class Hooks {
      */
 
     public static function onLoadExtensionSchemaUpdates( $updater ) {
-        //GET CONFIG -> DBPREFIX
-        // $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
-        // $nflDBPrefix = $config->get( 'nflDBPrefix' );
-        global $nflDBPrefix;
 
-        //replace
+        global $wgDBprefix, $nflDBprefix;
+
+        //GET CONFIG -> DBPREFIX
+        $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
+        $nflDBPrefix = $config->get( 'DBprefix' );
+        
+        echo $wgDBprefix . $nflDBprefix . "\n";
 
         // runs entire script
         $updater->addExtensionTable(
-            $nflDBPrefix,
+            $nflDBprefix,
             dirname ( __DIR__ ) . '/sql/FILE_SCHEMA.sql'
         );
     }

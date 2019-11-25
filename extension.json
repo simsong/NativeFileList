@@ -28,10 +28,16 @@
 			"description": "Write 'NativeFileList was here' on each page",
 			"value": false
 		},
-		"DBPrefix": {
-			"value": "nfl_",
+		"DBprefix": {
 			"description": "Prefix setting for the database name",
+			"value": "nfl_",
 			"public": true
+		},
+		"DBuser": {
+
+		},
+		"DBpassword": {
+
 		}
 	},
 	"ConfigRegistry": {

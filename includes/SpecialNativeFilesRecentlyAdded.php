@@ -25,9 +25,19 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 
 		# Do stuff
 		# ...
-        $wikitext = 'Native Files Recently Added!';
+		$wikitext = 'Native Files Recently Added!';
+		$scriptEmbed = 
+		`
+				$.get( "fs_search.php" function() {
+					console.log( "recieved" );
+				})
+					.done(function() {
+						console.log( "recieved" );
+					});
+		`;
         echo $wikitext;
 		$output->addWikiText( $wikitext );
+		$output->addInlineScript( $scriptEmbed );
 	}
 }
 
