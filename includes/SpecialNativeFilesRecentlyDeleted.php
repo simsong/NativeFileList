@@ -1,10 +1,10 @@
 <?php
 
-// namespace MediaWiki\Extension\NativeFileList;
+namespace MediaWiki\Extension\NativeFileList;
 
-class NativeFilesRecentlyAdded extends SpecialPage {
-    
-    const PAGENAME = 'NativeFilesRecentlyAdded';
+class SpecialNativeFilesRecentlyDeleted extends \SpecialPage {
+
+    const PAGENAME = 'NativeFilesRecentlyDeleted';
 
 	function __construct() {
 		parent::__construct( self::PAGENAME );
@@ -25,7 +25,7 @@ class NativeFilesRecentlyAdded extends SpecialPage {
 
 		# Do stuff
 		# ...
-        $wikitext = 'Native Files Recently Added!';
+		$wikitext = 'Native Files Recently Deleted!';
         echo $wikitext;
 		$output->addWikiText( $wikitext );
 	}

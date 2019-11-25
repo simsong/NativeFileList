@@ -1,6 +1,3 @@
--- Creates the das_s3bucket database
-CREATE DATABASE IF NOT EXISTS `das_s3bucket`;
-
 -- Create the metadata table
 DROP TABLE IF EXISTS /*_*/metadata;
 CREATE TABLE  /*_*/metadata (name VARCHAR(255) PRIMARY KEY, value VARCHAR(255) NOT NULL);
