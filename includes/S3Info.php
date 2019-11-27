@@ -23,7 +23,7 @@ class S3Info {
 
     function tr() {
         echo $bytes;
-        $talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
+        $talk_url = "index.php?title=Talk:" . $this->directory . $this->filename . "&action=edit";
         return "<tr><td class='nfl-date'>". date("d-m-Y", $this->datetime)."</td>".
         "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
         "<td class='nfl-directory' style='text-align:left'>".$this->directory."</td>".

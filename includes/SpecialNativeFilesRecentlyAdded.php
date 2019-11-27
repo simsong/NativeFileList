@@ -81,18 +81,18 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 
 		if ( count($res) == 0){
 			if ($term){
-				$out->addHTML("<p><b>No files matching " . $term . "</b></p>");
+				$out->prependHTML("<p><b>No files matching " . $term . "</b></p>");
 			}
 		} 
 
         if ( count($res) > 0 ){
-            $out->addHTML("<h3>S3 Search Results:</h3>");
-			$out->addHTML("<table>");
-			$out->addHTML("<tr><th>Date</th><th>Size</th><th>Directory</th><th>File Name</th></tr>");
+            $out->prependHTML("<h3>S3 Search Results:</h3>");
+			$out->prependHTML("<table>");
+			$out->prependHTML("<tr><th>Date</th><th>Size</th><th>Directory</th><th>File Name</th></tr>");
 			foreach ($res as $row){
-				$out->addHTML($row);
+				$out->prependHTML($row);
 			}
-			$out->addHTML("</table>");
+			$out->prependHTML("</table>");
 		}
 
 
