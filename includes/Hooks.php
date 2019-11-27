@@ -22,32 +22,37 @@ namespace MediaWiki\Extension\NativeFileList;
 use Title;
 use DatabaseUpdater;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\NativeFileList\S3Info as S3Info;
 
 const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
 // CONSTANTS
 define('SEARCH_LIMIT', '100');
 
-class S3Info {
-    public $datetime;
-    public $bytes;
-    public $filename; 
+// class S3Info {
+//     public $datetime;
+//     public $bytes;
+//     public $directory;
+//     public $filename; 
     
-    function __construct($datetime, $bytes, $filename){
-	$this->datetime = $datetime;
-	$this->bytes = $bytes;
-	$this->filename = $filename;
-    }
+//     function __construct($datetime, $bytes, $directory, $filename){
+// 	$this->datetime = $datetime;
+//     $this->bytes = $bytes;
+//     $this->directory = $directory;
+// 	$this->filename = $filename;
+//     }
 
-    function tr() {
-	$talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
-	return "<tr><td class='nfl-date'>".$this->datetime."</td>".
-	    "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
-	    "<td class='nfl-filename'>".$this->filename."</td>".
-	    "<td><a class='new' href='" . $talk_url . "'>[Talk]</a></td>".
-	    "</tr>";
-    }
-}
+//     function tr() {
+//         echo $bytes;
+// 	$talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
+// 	return "<tr><td class='nfl-date'>". date("d-m-Y", $this->datetime)."</td>".
+//         "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
+//         "<td class='nfl-directory' style='text-align:left'>".$this->directory."</td>".
+// 	    "<td class='nfl-filename'>".$this->filename."</td>".
+// 	    "<td><a class='new' href='" . $talk_url . "'>[Talk]</a></td>".
+// 	    "</tr>";
+//     }
+// }
 
 class Hooks {
 
@@ -61,19 +66,30 @@ class Hooks {
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
         echo 'Starting Special Search\n';
+
+        global $wgDBprefix, $nflDBprefix;
+
+        //GET CONFIG -> DBPREFIX
+        // $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
+        // $nflDBprefix = $config->get( 'DBprefix' );
+
         $res = array();
         $dbr = wfGetDB( DB_REPLICA );
+        echo $nflDBprefix;
         $q = $dbr->select(
-                array('das_s3bucket.files', 'das_s3bucket.filenames'), 
-                array('fileid','mtime','size','filename'), 
+                array( $wgDBprefix . $nflDBprefix . 'files',
+                $wgDBprefix . $nflDBprefix . 'filenames',
+                $wgDBprefix . $nflDBprefix . 'dirnames'), 
+                array('fileid','dirnameid','mtime','size','dirname','filename'), 
                 array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
                 __METHOD__,
                 array('LIMIT' => constant("SEARCH_LIMIT")),
                 array(
-                    'fileid' => array( 'NATURAL JOIN' )
+                    'fileid' => array( 'NATURAL JOIN' ),
+                    'dirnameid' => array( 'NATURAL JOIN' )
                 ));
         foreach ($q as $row) {
-                $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
+                $v    = new S3Info( $row->mtime, $row->bytes, $row->dirname, $row->filename );
             array_push($res, $v->tr() );
             }
         if (count($res)==(int)constant("SEARCH_LIMIT")){
@@ -89,7 +105,7 @@ class Hooks {
         if ( count($res) > 0 ){
             $out->addHTML("<h3>S3 Search Results:</h3>");
                 $out->addHTML("<table>");
-                $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
+                $out->addHTML("<tr><th>Date</th><th>Size</th><th>Directory</th><th>File Name</th></tr>");
                 foreach ($res as $row){
                     $out->addHTML($row);
                 }
@@ -115,7 +131,7 @@ class Hooks {
 
         //GET CONFIG -> DBPREFIX
         $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
-        $nflDBPrefix = $config->get( 'DBprefix' );
+        $nflDBprefix = $config->get( 'DBprefix' );
         
         echo $wgDBprefix . $nflDBprefix . "\n";
 
