@@ -21,6 +21,7 @@ namespace MediaWiki\Extension\NativeFileList;
 
 use Title;
 use DatabaseUpdater;
+use Mediawiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\NativeFileList\S3Info as S3Info;
 
@@ -28,31 +29,7 @@ const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
 // CONSTANTS
 define('SEARCH_LIMIT', '100');
-
-// class S3Info {
-//     public $datetime;
-//     public $bytes;
-//     public $directory;
-//     public $filename; 
-    
-//     function __construct($datetime, $bytes, $directory, $filename){
-// 	$this->datetime = $datetime;
-//     $this->bytes = $bytes;
-//     $this->directory = $directory;
-// 	$this->filename = $filename;
-//     }
-
-//     function tr() {
-//         echo $bytes;
-// 	$talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
-// 	return "<tr><td class='nfl-date'>". date("d-m-Y", $this->datetime)."</td>".
-//         "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
-//         "<td class='nfl-directory' style='text-align:left'>".$this->directory."</td>".
-// 	    "<td class='nfl-filename'>".$this->filename."</td>".
-// 	    "<td><a class='new' href='" . $talk_url . "'>[Talk]</a></td>".
-// 	    "</tr>";
-//     }
-// }
+define('NS_TALK', 'Talk');
 
 class Hooks {
 
@@ -69,6 +46,8 @@ class Hooks {
 
         global $wgDBprefix, $nflDBprefix;
 
+        $logger = LoggerFactory::getInstance( 'NativeFileList' );
+
         //GET CONFIG -> DBPREFIX
         // $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
         // $nflDBprefix = $config->get( 'DBprefix' );
@@ -79,38 +58,46 @@ class Hooks {
         $q = $dbr->select(
                 array( $wgDBprefix . $nflDBprefix . 'files',
                 $wgDBprefix . $nflDBprefix . 'filenames',
-                $wgDBprefix . $nflDBprefix . 'dirnames'), 
-                array('fileid','dirnameid','mtime','size','dirname','filename'), 
+                $wgDBprefix . $nflDBprefix . 'dirnames', 
+                $wgDBprefix . $nflDBprefix . 'roots as r'),
+                array('fileid','r.rootid','dirnameid','mtime','size','r.rootdir','dirname','filename'), 
                 array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
                 __METHOD__,
                 array('LIMIT' => constant("SEARCH_LIMIT")),
                 array(
                     'fileid' => array( 'NATURAL JOIN' ),
-                    'dirnameid' => array( 'NATURAL JOIN' )
+                    'r.rootid' => array ( 'NATURAL JOIN' ),
+                    'dirnameid' => array( 'NATURAL JOIN' ),
                 ));
         foreach ($q as $row) {
-                $v    = new S3Info( $row->mtime, $row->bytes, $row->dirname, $row->filename );
-            array_push($res, $v->tr() );
+            $talkExists = false;
+            $v = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );
+            $title = Title::newFromText( $v->rootdir . ':' . $v->directory . '/' . $v->filename, constant("NS_TALK") );
+            if ( $title->exists() ) {
+                $talkExists = true;
+                wfErrorLog( $v->filename . " exists...", '/var/www/mediawiki/debug.log');
             }
-        if (count($res)==(int)constant("SEARCH_LIMIT")){
+            array_push( $res, $v->tr($talkExists) );
+        }
+        if (count($res)==(int)constant("SEARCH_LIMIT")) {
             array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
         }
 
-            if ( count($res) == 0){
+            if ( count($res) == 0) {
                 if ($term){
                     $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
                 }
             } 
 
-        if ( count($res) > 0 ){
+        if ( count($res) > 0 ) {
             $out->addHTML("<h3>S3 Search Results:</h3>");
-                $out->addHTML("<table>");
-                $out->addHTML("<tr><th>Date</th><th>Size</th><th>Directory</th><th>File Name</th></tr>");
-                foreach ($res as $row){
-                    $out->addHTML($row);
-                }
-                $out->addHTML("</table>");
+            $out->addHTML("<table>");
+            $out->addHTML("<tr><th>Date</th><th>Size</th><th>Root</th><th>Directory</th><th>File Name</th></tr>");
+            foreach ($res as $row) {
+                $out->addHTML($row);
             }
+            $out->addHTML("</table>");
+        }
     }
 
 
