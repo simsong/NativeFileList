@@ -90,7 +90,7 @@ class Hooks {
                 }
             } 
 
-        if ( count($res) > 0 ) {
+        if ( count($res) >= 0 ) {
             $table = "";
             $out->addHTML("<h3>S3 Search Results:</h3>");
             $table .= "{| class='wikitable'\n";
@@ -101,7 +101,7 @@ class Hooks {
             $table .= "! Root: \n";
             $table .= "! Directory: \n";
             $table .= "! File Name: \n";
-            $table .= "! \n";
+            $table .= "! Discussion\n";
             foreach ($res as $row) {
                 // $out->addHTML($row);
                 $table .= "|-\n";

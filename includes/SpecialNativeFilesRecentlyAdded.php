@@ -21,7 +21,7 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 	function execute( $par ) {
         parent::execute( $par );
 		$request = $this->getRequest();
-		$output = $this->getOutput();
+		$out = $this->getOutput();
 		$this->setHeaders();
 
 		# Set globals
@@ -40,6 +40,7 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 		 */
 		$dbr = wfGetDB( DB_REPLICA );
 
+		$scans = array();
 		$scanQ = $dbr->select(
 			$wgDBprefix . $nflDBprefix . 'scans' ,
 			array('scanid'),
@@ -51,52 +52,48 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 			)
 		);
 
-		$output->addWikiText( $scanQ->scanid );
-
-        $q = $dbr->select(
-			array( $wgDBprefix . $nflDBprefix . 'files',
-			$wgDBprefix . $nflDBprefix . 'paths as p',
-			$wgDBprefix . $nflDBprefix . 'filenames as fn',
-			$wgDBprefix . $nflDBprefix . 'dirnames as d'), 
-			array( 'fileid', 'p.pathid', 'size', 'd.dirnameid','dirname', 'fn.filenameid', 'filename','mtime' ), 
-			array( 
-				'scanid=15'#,
-				// 'pathid NOT IN (SELECT pathid FROM ' $wgDBprefix . $nflDBprefix . 'files WHERE scanid={scan1})',
-				), # WHERE
-			__METHOD__,
-			array( 'LIMIT' => self::SEARCH_LIMIT ),
-			array(
-				'pathid' => array( 'NATURAL JOIN' ),
-				'dirnameid' => array( 'NATURAL JOIN' ),
-				'filenameid' => array( 'NATURAL JOIN' ),
-			));
-
-		foreach ($q as $row) {
-			$v    = new S3Info( $row->mtime, $row->bytes, $row->dirname, $row->filename );
-			array_push($res, $v->tr() );
+		foreach ($scanQ as $row) {
+			array_push( $scans, $row->scanid );
 		}
-        if (count($res)==(int)constant("SEARCH_LIMIT")){
-            array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
+
+		$res = array();
+
+		$prefix = $wgDBprefix . $nflDBprefix;
+		$query = "SELECT fileid, pathid, rootid, rootdir, size,  dirnameid, dirname, filenameid, filename, mtime ";
+		$query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN " . $dbr->tableName($prefix . "paths") . " NATURAL JOIN " . $dbr->tableName($prefix . "roots");
+		$query .= " NATURAL JOIN " . $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN " . $dbr->tableName($prefix . "filenames") . " ";
+		$query .= "WHERE scanid=" . $scans[1] . " AND pathid NOT IN (SELECT pathid FROM " . $dbr->tableName($prefix . "files") . " WHERE scanid=" . $scans[0] . ") LIMIT " . self::SEARCH_LIMIT;
+
+		$q = $dbr->query( $query );
+		foreach ($q as $row) {
+			$v    = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );
+			array_push($res, $v );
+		}
+        if ( count($res) >= self::SEARCH_LIMIT ) {
+			// array_push($res, "<tr><td colspan='3'>Only the first " . self::SEARCH_LIMIT . " hits are shown</td></tr>");
+			$out->addWikiText( "Only the first " . self::SEARCH_LIMIT . " hits are shown" );
         }
 
-		if ( count($res) == 0){
-			if ($term){
-				$out->prependHTML("<p><b>No files matching " . $term . "</b></p>");
-			}
-		} 
-
-        if ( count($res) > 0 ){
-            $out->prependHTML("<h3>S3 Search Results:</h3>");
-			$out->prependHTML("<table>");
-			$out->prependHTML("<tr><th>Date</th><th>Size</th><th>Directory</th><th>File Name</th></tr>");
-			foreach ($res as $row){
-				$out->prependHTML($row);
-			}
-			$out->prependHTML("</table>");
-		}
-
-
-		$output->addWikiText( '[[{{ns:11}}:Foo|Text]]');
+		if ( count($res) > 0 ) {
+            $table = "{| class='wikitable' \n";
+            $table .= "! Date: \n";
+            $table .= "! Size: \n";
+            $table .= "! Root: \n";
+            $table .= "! Directory: \n";
+            $table .= "! File Name: \n";
+            $table .= "! Discussion\n";
+            foreach ($res as $row) {
+                $table .= "|-\n";
+                $table .= "| " . date("d-m-Y", $row->datetime) . " \n";
+                $table .= "| " . $row->bytes . " \n";
+                $table .= "| " . $row->root . " \n";
+                $table .= "| " . $row->directory . " \n";
+                $table .= "| " . $row->filename . " \n";
+                $table .= "| [[Talk:" . $row->root . ":" . $row->directory . "/" . $row->filename . "]] \n";
+            }
+			$table .= "|}";
+            $out->addWikiText($table);
+        }
 	}
 }
 

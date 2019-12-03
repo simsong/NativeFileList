@@ -11,6 +11,7 @@ $specialPageAliases = [];
 /** English
  * @author djstreat
  */
+/** English (English) */
 $specialPageAliases['en'] = [
 	'NativeFileList' => [ 'NativeFileList', 'Native File List' ],
 	'NativeFilesRecentlyAdded' => [ 'NativeFilesRecentlyAdded', 'Native Files Recently Added' ],
