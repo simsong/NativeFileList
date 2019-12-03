@@ -72,12 +72,13 @@ class Hooks {
         foreach ($q as $row) {
             $talkExists = false;
             $v = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );
-            $title = Title::newFromText( $v->rootdir . ':' . $v->directory . '/' . $v->filename, constant("NS_TALK") );
+            $title = Title::newFromText( $v->root . ':' . $v->directory . '/' . $v->filename, constant("NS_TALK") );
             if ( $title->exists() ) {
                 $talkExists = true;
-                wfErrorLog( $v->filename . " exists...", '/var/www/mediawiki/debug.log');
+                // wfErrorLog( $v->filename . " exists...", '/var/www/mediawiki/debug.log');
             }
-            array_push( $res, $v->tr($talkExists) );
+            // array_push( $res, $v->tr($talkExists) );
+            array_push( $res, $v );
         }
         if (count($res)==(int)constant("SEARCH_LIMIT")) {
             array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
@@ -90,13 +91,31 @@ class Hooks {
             } 
 
         if ( count($res) > 0 ) {
+            $table = "";
             $out->addHTML("<h3>S3 Search Results:</h3>");
-            $out->addHTML("<table>");
-            $out->addHTML("<tr><th>Date</th><th>Size</th><th>Root</th><th>Directory</th><th>File Name</th></tr>");
+            $table .= "{| class='wikitable'\n";
+            // $out->addHTML("<table>");
+            // $out->addHTML("<tr><th>Date</th><th>Size</th><th>Root</th><th>Directory</th><th>File Name</th></tr>");
+            $table .= "! Date: \n";
+            $table .= "! Size: \n";
+            $table .= "! Root: \n";
+            $table .= "! Directory: \n";
+            $table .= "! File Name: \n";
+            $table .= "! \n";
             foreach ($res as $row) {
-                $out->addHTML($row);
+                // $out->addHTML($row);
+                $table .= "|-\n";
+                $table .= "| " . date("d-m-Y", $row->datetime) . "\n";
+                $table .= "| " . $row->bytes . "\n";
+                $table .= "| " . $row->root . "\n";
+                $table .= "| " . $row->directory . "\n";
+                $table .= "| " . $row->filename . "\n";
+                $table .= "| [[Talk:" . $row->root . ":" . $row->directory . "/" . $row->filename . "]]\n";
             }
-            $out->addHTML("</table>");
+            // $out->addHTML("</table>");
+            $table .= "|}";
+            $out->addWikiText($table);
+
         }
     }
 
