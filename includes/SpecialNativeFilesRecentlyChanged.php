@@ -72,7 +72,7 @@ class SpecialNativeFilesRecentlyChanged extends \SpecialPage {
 			$query = "SELECT fileid, pathid, rootid, rootdir, size,  dirnameid, dirname, filenameid, filename, mtime ";
 			$query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN " . $dbr->tableName($prefix . "paths") . " NATURAL JOIN " . $dbr->tableName($prefix . "roots");
 			$query .= " NATURAL JOIN " . $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN " . $dbr->tableName($prefix . "filenames") . " ";
-			$query .= "WHERE pathid=" . $pathid;
+			$query .= "WHERE pathid=" . $pathid . " ORDER BY mtime DESC LIMIT 1";
 			
 			$q = $dbr->query($query);
 			foreach($q as $row) {

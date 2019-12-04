@@ -62,7 +62,7 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 		$query = "SELECT fileid, pathid, rootid, rootdir, size,  dirnameid, dirname, filenameid, filename, mtime ";
 		$query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN " . $dbr->tableName($prefix . "paths") . " NATURAL JOIN " . $dbr->tableName($prefix . "roots");
 		$query .= " NATURAL JOIN " . $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN " . $dbr->tableName($prefix . "filenames") . " ";
-		$query .= "WHERE scanid=" . $scans[1] . " AND pathid NOT IN (SELECT pathid FROM " . $dbr->tableName($prefix . "files") . " WHERE scanid=" . $scans[0] . ") LIMIT " . self::SEARCH_LIMIT;
+		$query .= "WHERE scanid=" . $scans[0] . " AND pathid NOT IN (SELECT pathid FROM " . $dbr->tableName($prefix . "files") . " WHERE scanid=" . $scans[1] . ") LIMIT " . self::SEARCH_LIMIT;
 
 		$q = $dbr->query( $query );
 		foreach ($q as $row) {

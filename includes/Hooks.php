@@ -29,7 +29,6 @@ const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
 // CONSTANTS
 define('SEARCH_LIMIT', '100');
-define('NS_TALK', 'Talk');
 
 class Hooks {
 
@@ -42,7 +41,7 @@ class Hooks {
      * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
-        echo 'Starting Special Search\n';
+        // echo 'Starting Special Search\n';
 
         global $wgDBprefix, $nflDBprefix;
 
@@ -69,15 +68,27 @@ class Hooks {
                     'r.rootid' => array ( 'NATURAL JOIN' ),
                     'dirnameid' => array( 'NATURAL JOIN' ),
                 ));
+
+
+        $prefix = $wgDBprefix . $nflDBprefix;
+
+        // $query = "SELECT fileid, r.rootid, dirnameid, mtime, size, rootdir, dirname, filename ";
+        // $query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN ";
+        // $query .= $dbr->tableName($prefix . "filenames") . " NATURAL JOIN ";
+        // $query .= $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN ";
+        // $query .= $dbr->tableName($prefix . "roots");
+        // $query .= "FROM " . $dbr->tableName($prefix . "files") . "," . $dbr->tableName($prefix . "filenames") . "," . $dbr->tableName($prefix . "dirnames") . "," . $dbr->tableName($prefix . "roots") . " as r";
+        // $query .= " WHERE (filename LIKE '% " . $term . "%' ESCAPE '`') LIMIT " . constant("SEARCH_LIMIT");
+        
+
+
+        // $q = $dbr->query($query);
+
         foreach ($q as $row) {
             $talkExists = false;
             $v = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );
-            $title = Title::newFromText( $v->root . ':' . $v->directory . '/' . $v->filename, constant("NS_TALK") );
-            if ( $title->exists() ) {
-                $talkExists = true;
-                // wfErrorLog( $v->filename . " exists...", '/var/www/mediawiki/debug.log');
-            }
-            // array_push( $res, $v->tr($talkExists) );
+            // echo $row->mtime . " " .$row->size . " " .$row->rootdir . " " .$row->dirname . " " .$row->filename;
+            $q->current();
             array_push( $res, $v );
         }
         if (count($res)==(int)constant("SEARCH_LIMIT")) {
