@@ -53,34 +53,30 @@ class Hooks {
 
         $res = array();
         $dbr = wfGetDB( DB_REPLICA );
-        echo $nflDBprefix;
-        $q = $dbr->select(
-                array( $wgDBprefix . $nflDBprefix . 'files',
-                $wgDBprefix . $nflDBprefix . 'filenames',
-                $wgDBprefix . $nflDBprefix . 'dirnames', 
-                $wgDBprefix . $nflDBprefix . 'roots as r'),
-                array('fileid','r.rootid','dirnameid','mtime','size','r.rootdir','dirname','filename'), 
-                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
-                __METHOD__,
-                array('LIMIT' => constant("SEARCH_LIMIT")),
-                array(
-                    'fileid' => array( 'NATURAL JOIN' ),
-                    'r.rootid' => array ( 'NATURAL JOIN' ),
-                    'dirnameid' => array( 'NATURAL JOIN' ),
-                ));
-
 
         $prefix = $wgDBprefix . $nflDBprefix;
+        echo $prefix;
+        $q = $dbr->select(
+                array( $prefix . 'files NATURAL JOIN ' 
+                    . $prefix . 'paths NATURAL JOIN ' 
+                    . $prefix . 'filenames NATURAL JOIN ' 
+                    . $prefix . 'dirnames NATURAL JOIN '
+                    . $prefix . 'roots'),
+                array('fileid','rootid','dirnameid','mtime','size','rootdir','dirname','filename'), 
+                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString()),),
+                __METHOD__,
+                array('LIMIT' => constant("SEARCH_LIMIT")));
+
+
 
         // $query = "SELECT fileid, r.rootid, dirnameid, mtime, size, rootdir, dirname, filename ";
         // $query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN ";
         // $query .= $dbr->tableName($prefix . "filenames") . " NATURAL JOIN ";
         // $query .= $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN ";
-        // $query .= $dbr->tableName($prefix . "roots");
-        // $query .= "FROM " . $dbr->tableName($prefix . "files") . "," . $dbr->tableName($prefix . "filenames") . "," . $dbr->tableName($prefix . "dirnames") . "," . $dbr->tableName($prefix . "roots") . " as r";
+        // $query .= $dbr->tableName($prefix . "roots") . " as r ";
         // $query .= " WHERE (filename LIKE '% " . $term . "%' ESCAPE '`') LIMIT " . constant("SEARCH_LIMIT");
         
-
+        // echo $query;
 
         // $q = $dbr->query($query);
 
