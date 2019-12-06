@@ -14,7 +14,8 @@ class SpecialNativeFilesRecentlyDeleted extends \SpecialPage {
         return 'Native File List';
     }
 
-	function execute( $par ) {        parent::execute( $par );
+	function execute( $par ) {        
+		parent::execute( $par );
 		$request = $this->getRequest();
 		$out = $this->getOutput();
 		$this->setHeaders();

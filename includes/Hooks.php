@@ -41,20 +41,32 @@ class Hooks {
      * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
-        // echo 'Starting Special Search\n';
-
         global $wgDBprefix, $nflDBprefix;
+        $prefix = $wgDBprefix . $nflDBprefix;
 
         $logger = LoggerFactory::getInstance( 'NativeFileList' );
 
-        //GET CONFIG -> DBPREFIX
-        // $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
-        // $nflDBprefix = $config->get( 'DBprefix' );
-
-        $res = array();
         $dbr = wfGetDB( DB_REPLICA );
 
-        $prefix = $wgDBprefix . $nflDBprefix;
+        // Collect scans
+        $scans = array();
+
+		$scanQuery = "SELECT scanid FROM  " . $dbr->tableName($prefix . "scans");
+		$scanQuery .= " ORDER BY scanid DESC LIMIT 1";
+
+		$scanQ = $dbr->query($scanQuery);
+
+		foreach ($scanQ as $row) {
+			array_push( $scans, $row->scanid );
+		}
+
+		if (count($scans) < 1) {
+			$out->addWikiText("Not enough scans to populate. Please wait until there are more scans.");
+			return;
+        }
+        
+        // Query Results
+        $res = array();
         echo $prefix;
         $q = $dbr->select(
                 array( $prefix . 'files NATURAL JOIN ' 
@@ -63,7 +75,8 @@ class Hooks {
                     . $prefix . 'dirnames NATURAL JOIN '
                     . $prefix . 'roots'),
                 array('fileid','rootid','dirnameid','mtime','size','rootdir','dirname','filename'), 
-                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString()),),
+                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString()),
+                    'scanid=' . $scans[0]),
                 __METHOD__,
                 array('LIMIT' => constant("SEARCH_LIMIT")));
 

@@ -53,12 +53,8 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 
 		$scans = array();
 
-
-
 		$scanQuery = "SELECT scanid FROM  " . $dbr->tableName($prefix . "scans");
 		$scanQuery .= " ORDER BY scanid DESC LIMIT 2";
-
-		echo $scanQuery;
 
 		$scanQ = $dbr->query($scanQuery);
 

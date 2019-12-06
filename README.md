@@ -15,3 +15,10 @@ You should be all set!
 
 # Configuration
 The default configuration for this should be sufficient for any implementation. All of the tables for the configuration begin with your mediawiki database prefix (Ex. `mw2_`) followed by the NativeFileList prefix.
+
+## Hooks
+Currently this extension primarily uses two extension hooks:
+
+- onLoadsSchemaUpdate
+- onSpecialSearchResultsAppend
+
