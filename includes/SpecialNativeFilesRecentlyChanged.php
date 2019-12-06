@@ -22,7 +22,8 @@ class SpecialNativeFilesRecentlyChanged extends \SpecialPage {
 		$this->setHeaders();
 
 		# Set globals
-        global $wgDBprefix, $nflDBprefix;
+		global $wgDBprefix, $nflDBprefix;
+		$prefix = $nflDBprefix;
 
 		# Get request data from, e.g.
 		$param = $request->getText( 'param' );
@@ -40,7 +41,7 @@ class SpecialNativeFilesRecentlyChanged extends \SpecialPage {
 
 		$scans = array();
 		$scanQ = $dbr->select(
-			$wgDBprefix . $nflDBprefix . 'scans' ,
+			$prefix . 'scans' ,
 			array('scanid'),
 			array( ),
 			__METHOD__,
@@ -54,9 +55,13 @@ class SpecialNativeFilesRecentlyChanged extends \SpecialPage {
 			array_push( $scans, $row->scanid );
 		}
 
+		if (count($scans) < 2) {
+			$out->addWikiText("Not enough scans to populate. Please wait until there are more scans.");
+			return;
+		}
+
 		$changedPathIds = array();
 
-		$prefix = $wgDBprefix . $nflDBprefix;
 		$query = "SELECT a.pathid as pathid, a.hashid, b.hashid ";
 		$query .= "FROM (SELECT pathid, hashid, scanid FROM " . $dbr->tableName( $prefix . "files" ) . "WHERE scanid=" . $scans[0] . ") as a ";
 		$query .= "JOIN (SELECT pathid, hashid, scanid FROM " . $dbr->tableName( $prefix . "files" ) . "WHERE scanid=". $scans[1] . ") as b ";

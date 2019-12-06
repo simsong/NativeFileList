@@ -67,19 +67,6 @@ class Hooks {
                 __METHOD__,
                 array('LIMIT' => constant("SEARCH_LIMIT")));
 
-
-
-        // $query = "SELECT fileid, r.rootid, dirnameid, mtime, size, rootdir, dirname, filename ";
-        // $query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN ";
-        // $query .= $dbr->tableName($prefix . "filenames") . " NATURAL JOIN ";
-        // $query .= $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN ";
-        // $query .= $dbr->tableName($prefix . "roots") . " as r ";
-        // $query .= " WHERE (filename LIKE '% " . $term . "%' ESCAPE '`') LIMIT " . constant("SEARCH_LIMIT");
-        
-        // echo $query;
-
-        // $q = $dbr->query($query);
-
         foreach ($q as $row) {
             $talkExists = false;
             $v = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );

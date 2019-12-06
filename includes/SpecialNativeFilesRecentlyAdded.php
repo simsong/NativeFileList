@@ -31,7 +31,7 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 
 		# Set globals
         global $wgDBprefix, $nflDBprefix;
-		$prefix = $wgDBprefix . $nflDBprefix;
+		$prefix = $nflDBprefix;
 
 		#check prefixes
 		wfDebugLog( 'NativeFileList', 
@@ -62,19 +62,13 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 
 		$scanQ = $dbr->query($scanQuery);
 
-		// $scanQ = $dbr->select(
-		// 	$prefix . 'scans' ,
-		// 	array('scanid'),
-		// 	array( ),
-		// 	__METHOD__,
-		// 	array(
-		// 		'LIMIT' => '2',
-		// 		'ORDER BY' => 'scanid DESC'
-		// 	)
-		// );
-
 		foreach ($scanQ as $row) {
 			array_push( $scans, $row->scanid );
+		}
+
+		if (count($scans) < 2) {
+			$out->addWikiText("Not enough scans to populate. Please wait until there are more scans.");
+			return;
 		}
 
 		$res = array();

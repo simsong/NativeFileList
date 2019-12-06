@@ -21,6 +21,7 @@ class SpecialNativeFilesRecentlyDeleted extends \SpecialPage {
 
 		# Set globals
         global $wgDBprefix, $nflDBprefix;
+		$prefix = $nflDBprefix;
 
 		# Get request data from, e.g.
 		$param = $request->getText( 'param' );
@@ -37,7 +38,7 @@ class SpecialNativeFilesRecentlyDeleted extends \SpecialPage {
 
 		$scans = array();
 		$scanQ = $dbr->select(
-			$wgDBprefix . $nflDBprefix . 'scans' ,
+			$prefix . 'scans' ,
 			array('scanid'),
 			array( ),
 			__METHOD__,
@@ -51,9 +52,12 @@ class SpecialNativeFilesRecentlyDeleted extends \SpecialPage {
 			array_push( $scans, $row->scanid );
 		}
 
-		$res = array();
+		if (count($scans) < 2) {
+			$out->addWikiText("Not enough scans to populate. Please wait until there are more scans.");
+			return;
+		}
 
-		$prefix = $wgDBprefix . $nflDBprefix;
+		$res = array();
 		$query = "SELECT fileid, pathid, rootid, rootdir, size,  dirnameid, dirname, filenameid, filename, mtime ";
 		$query .= "FROM " . $dbr->tableName($prefix . "files") . " NATURAL JOIN " . $dbr->tableName($prefix . "paths") . " NATURAL JOIN " . $dbr->tableName($prefix . "roots");
 		$query .= " NATURAL JOIN " . $dbr->tableName($prefix . "dirnames") . " NATURAL JOIN " . $dbr->tableName($prefix . "filenames") . " ";

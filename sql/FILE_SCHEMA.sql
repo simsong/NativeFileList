@@ -1,10 +1,10 @@
 -- Create the metadata table
-DROP TABLE IF EXISTS /*_*/metadata;
-CREATE TABLE  /*_*/metadata (name VARCHAR(255) PRIMARY KEY, value VARCHAR(255) NOT NULL);
+DROP TABLE IF EXISTS /*_*/nfl_metadata;
+CREATE TABLE  /*_*/nfl_metadata (name VARCHAR(255) PRIMARY KEY, value VARCHAR(255) NOT NULL);
 
 -- Create the roots table
 DROP TABLE IF EXISTS /*_*/nfl_roots;
-CREATE TABLE /*_*/nfl_roots (rootid INTEGER PRIMARY KEY AUTO_INCREMENT, rootdir VARCHAR(255) NOT NULL);
+CREATE TABLE /*_*/nfl_roots (rootid INTEGER PRIMARY KEY AUTO_INCREMENT, rootdir VARCHAR(255) UNIQUE NOT NULL);
 
 -- Create dirnames table
 DROP TABLE IF EXISTS /*_*/nfl_dirnames;
@@ -37,6 +37,7 @@ CREATE TABLE  /*_*/nfl_scans (scanid INTEGER PRIMARY KEY AUTO_INCREMENT,
                                       duration INTEGER);
 CREATE INDEX  /*i*/scans_idx1 ON /*_*/nfl_scans(scanid);
 CREATE INDEX  /*i*/scans_idx2 ON /*_*/nfl_scans(time);
+CREATE UNIQUE INDEX /*i*/scans_idx3 ON /*_*/nfl_scans(rootid,time);
 
 -- Creates the files
 DROP TABLE IF EXISTS /*_*/nfl_files;
