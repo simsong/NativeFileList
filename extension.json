@@ -50,9 +50,9 @@
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\NativeFileList\\Hooks::onLoadExtensionSchemaUpdates"
 	},
 	"SpecialPages": {
-		"NativeFilesRecentlyAdded": "MediaWiki\\Extension\\NativeFileList\\SpecialNativeFilesRecentlyAdded",
-		"NativeFilesRecentlyChanged": "MediaWiki\\Extension\\NativeFileList\\SpecialNativeFilesRecentlyChanged",
-		"NativeFilesRecentlyDeleted": "MediaWiki\\Extension\\NativeFileList\\SpecialNativeFilesRecentlyDeleted"
+		"NativeFilesRecentlyAdded": "SpecialNativeFilesRecentlyAdded",
+		"NativeFilesRecentlyChanged": "SpecialNativeFilesRecentlyChanged",
+		"NativeFilesRecentlyDeleted": "SpecialNativeFilesRecentlyDeleted"
 	},
 	"AvailableRights": [
 		"nativefilelist-right"

@@ -12,9 +12,9 @@ $specialPageAliases = [];
  * @author djstreat
  */
 /** English (English) */
-$specialPageAliases['en'] = [
-	'NativeFileList' => [ 'NativeFileList', 'Native File List' ],
-	'NativeFilesRecentlyAdded' => [ 'NativeFilesRecentlyAdded', 'Native Files Recently Added' ],
-	'NativeFilesRecentlyChanged' => [ 'NativeFilesRecentlyChanged', 'Native Files Recently Changed' ],
-	'NativeFilesRecentlyDeleted' => [ 'NativeFilesRecentlyDeleted', 'Native Files Recently Deleted' ],
-];
+$specialPageAliases['en'] = array(
+	'NativeFileList' => array( 'Native File List' ),
+	'NativeFilesRecentlyAdded' => array( 'Native Files Recently Added' ),
+	'NativeFilesRecentlyChanged' => array( 'Native Files Recently Changed' ),
+	'NativeFilesRecentlyDeleted' => array( 'Native Files Recently Deleted' ),
+);

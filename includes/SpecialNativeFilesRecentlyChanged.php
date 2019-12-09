@@ -1,7 +1,5 @@
 <?php
 
-namespace MediaWiki\Extension\NativeFileList;
-
 class SpecialNativeFilesRecentlyChanged extends \SpecialPage {
 
 	const PAGENAME = 'NativeFilesRecentlyChanged';

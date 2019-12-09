@@ -1,7 +1,5 @@
 <?php
 
-namespace MediaWiki\Extension\NativeFileList;
-
 use MediaWiki\MediaWikiServices;
 use Mediawiki\Logger\LoggerFactory;
 use MediaWiki\Extension\NativeFileList\S3Info as S3Info;
@@ -9,6 +7,7 @@ use MediaWiki\Extension\NativeFileList\S3Info as S3Info;
 class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
     
 	const PAGENAME = 'NativeFilesRecentlyAdded';
+	const PAGENICKNAME = 'added';
 	const SEARCH_LIMIT = 100;
 
 	function __construct() {
@@ -23,8 +22,8 @@ class SpecialNativeFilesRecentlyAdded extends \SpecialPage {
 		#Things that need to be done at the beginning of an execute function
         parent::execute( $par );
 		$request = $this->getRequest();
-		$out = $this->getOutput();
 		$this->setHeaders();
+		$out = $this->getOutput();
 
 		#Setup Logger
         $logger = LoggerFactory::getInstance( 'NativeFileList' );
