@@ -21,32 +21,14 @@ namespace MediaWiki\Extension\NativeFileList;
 
 use Title;
 use DatabaseUpdater;
+use Mediawiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\NativeFileList\S3Info as S3Info;
 
 const FILE_INDEX='/var/www/html/filelist_s3.txt';
 
 // CONSTANTS
 define('SEARCH_LIMIT', '100');
-
-class S3Info {
-    public $datetime;
-    public $bytes;
-    public $filename; 
-    
-    function __construct($datetime, $bytes, $filename){
-	$this->datetime = $datetime;
-	$this->bytes = $bytes;
-	$this->filename = $filename;
-    }
-
-    function tr() {
-	$talk_url = "index.php?title=Talk:" . $this->filename . "&action=edit&redlink=1";
-	return "<tr><td class='nfl-date'>".$this->datetime."</td>".
-	    "<td class='nfl-bytes' style='text-align:right'>".$this->bytes."</td>".
-	    "<td class='nfl-filename'>".$this->filename."</td>".
-	    "<td><a class='new' href='" . $talk_url . "'>[Talk]</a></td>".
-	    "</tr>";
-    }
-}
 
 class Hooks {
 
@@ -59,41 +41,89 @@ class Hooks {
      * https://hotexamples.com/examples/-/-/wfGetDB/php-wfgetdb-function-examples.html
      */
     public static function onSpecialSearchResultsAppend( $that, $out, $term ) {
-        echo 'Starting Special Search\n';
-        $res = array();
+        global $wgDBprefix, $nflDBprefix;
+        $prefix = $wgDBprefix . $nflDBprefix;
+
+        $logger = LoggerFactory::getInstance( 'NativeFileList' );
+
         $dbr = wfGetDB( DB_REPLICA );
+
+        // Collect scans
+        $scans = array();
+
+		$scanQuery = "SELECT scanid FROM  " . $dbr->tableName($prefix . "scans");
+		$scanQuery .= " ORDER BY scanid DESC LIMIT 1";
+
+		$scanQ = $dbr->query($scanQuery);
+
+		foreach ($scanQ as $row) {
+			array_push( $scans, $row->scanid );
+		}
+
+		if (count($scans) < 1) {
+			$out->addWikiText("Not enough scans to populate. Please wait until there are more scans.");
+			return;
+        }
+        
+        // Query Results
+        $res = array();
+        echo $prefix;
         $q = $dbr->select(
-                array('das_s3bucket.files', 'das_s3bucket.filenames'), 
-                array('fileid','mtime','size','filename'), 
-                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString())),
+                array( $prefix . 'files NATURAL JOIN ' 
+                    . $prefix . 'paths NATURAL JOIN ' 
+                    . $prefix . 'filenames NATURAL JOIN ' 
+                    . $prefix . 'dirnames NATURAL JOIN '
+                    . $prefix . 'roots'),
+                array('fileid','rootid','dirnameid','mtime','size','rootdir','dirname','filename'), 
+                array('filename ' . $dbr->buildLike( $dbr->anyString() , $term , $dbr->anyString()),
+                    'scanid=' . $scans[0]),
                 __METHOD__,
-                array('LIMIT' => constant("SEARCH_LIMIT")),
-                array(
-                    'fileid' => array( 'NATURAL JOIN' )
-                ));
+                array('LIMIT' => constant("SEARCH_LIMIT")));
+
         foreach ($q as $row) {
-                $v    = new S3Info( $row->mtime, $row->bytes, $row->filename );
-            array_push($res, $v->tr() );
-            }
-        if (count($res)==(int)constant("SEARCH_LIMIT")){
+            $talkExists = false;
+            $v = new S3Info( $row->mtime, $row->size, $row->rootdir, $row->dirname, $row->filename );
+            // echo $row->mtime . " " .$row->size . " " .$row->rootdir . " " .$row->dirname . " " .$row->filename;
+            $q->current();
+            array_push( $res, $v );
+        }
+        if (count($res)==(int)constant("SEARCH_LIMIT")) {
             array_push($res, "<tr><td colspan='3'>Only the first " . constant("SEARCH_LIMIT") . " hits are shown</td></tr>");
         }
 
-            if ( count($res) == 0){
+            if ( count($res) == 0) {
                 if ($term){
                     $out->addHTML("<p><b>No files matching " . $term . "</b></p>");
                 }
             } 
 
-        if ( count($res) > 0 ){
+        if ( count($res) >= 0 ) {
+            $table = "";
             $out->addHTML("<h3>S3 Search Results:</h3>");
-                $out->addHTML("<table>");
-                $out->addHTML("<tr><th>Date</th><th>Size</th><th>File Name</th></tr>");
-                foreach ($res as $row){
-                    $out->addHTML($row);
-                }
-                $out->addHTML("</table>");
+            $table .= "{| class='wikitable'\n";
+            // $out->addHTML("<table>");
+            // $out->addHTML("<tr><th>Date</th><th>Size</th><th>Root</th><th>Directory</th><th>File Name</th></tr>");
+            $table .= "! Date: \n";
+            $table .= "! Size: \n";
+            $table .= "! Root: \n";
+            $table .= "! Directory: \n";
+            $table .= "! File Name: \n";
+            $table .= "! Discussion\n";
+            foreach ($res as $row) {
+                // $out->addHTML($row);
+                $table .= "|-\n";
+                $table .= "| " . date("d-m-Y", $row->datetime) . "\n";
+                $table .= "| " . $row->bytes . "\n";
+                $table .= "| " . $row->root . "\n";
+                $table .= "| " . $row->directory . "\n";
+                $table .= "| " . $row->filename . "\n";
+                $table .= "| [[Talk:" . $row->root . ":" . $row->directory . "/" . $row->filename . "]]\n";
             }
+            // $out->addHTML("</table>");
+            $table .= "|}";
+            $out->addWikiText($table);
+
+        }
     }
 
 
@@ -109,9 +139,18 @@ class Hooks {
      */
 
     public static function onLoadExtensionSchemaUpdates( $updater ) {
+
+        global $wgDBprefix, $nflDBprefix;
+
+        //GET CONFIG -> DBPREFIX
+        $config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'NativeFileList' );
+        $nflDBprefix = $config->get( 'DBprefix' );
+        
+        echo $wgDBprefix . $nflDBprefix . "\n";
+
         // runs entire script
         $updater->addExtensionTable(
-            'das',
+            $nflDBprefix,
             dirname ( __DIR__ ) . '/sql/FILE_SCHEMA.sql'
         );
     }

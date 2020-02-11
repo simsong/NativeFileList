@@ -1,21 +1,24 @@
-This is a blank extension template. It doesn't really do anything on its own.
-It is intended to provide a boiler template for an actual MediaWiki extension.
+# Native File List mediawiki-extension
+An extension that adds search for filesystems and S3 buckets. Designed for compatibility with [Filetime_Tools](https://github.com/simsong/filetime_tools)
 
-If you are checking this out from Git and intend to use it, you may use the
-following commands to make a clean directory of just this template without the
-Git meta-data and other examples.
+# Installation
+To install the NativeFileList extension, first go to the extensions folder of your mediawiki installation:
+`cd mediawiki/extensions`
 
-	cd extensions
-	git clone https://gerrit.wikimedia.org/r/mediawiki/extensions/BoilerPlate.git
-	cp -R BoilerPlate ./MyExtension
+Then clone this repository into that folder:
+`https://github.com/simsong/NativeFileList.git`
 
-This automates the recommended code checkers for PHP and JavaScript code in Wikimedia projects
-(see https://www.mediawiki.org/wiki/Continuous_integration/Entry_points).
-To take advantage of this automation.
+Finally, run the `update.php` script to create the database schema:
+`php mediawiki/maintenance/update.php`
 
-1. install nodejs, npm, and PHP composer
-2. change to the extension's directory
-3. `npm install`
-4. `composer install`
+You should be all set!
 
-Once set up, running `npm test` and `composer test` will run automated code checks.
+# Configuration
+The default configuration for this should be sufficient for any implementation. All of the tables for the configuration begin with your mediawiki database prefix (Ex. `mw2_`) followed by the NativeFileList prefix.
+
+## Hooks
+Currently this extension primarily uses two extension hooks:
+
+- onLoadsSchemaUpdate
+- onSpecialSearchResultsAppend
+

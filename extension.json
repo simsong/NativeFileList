@@ -14,10 +14,13 @@
 		"MediaWiki\\Extension\\NativeFileList\\": "includes/"
 	},
 	"AutoloadClasses": {
-		"NativeFilesRecentlyAdded": "includes/NativeFilesRecentlyAdded.php",
-		"NativeFilesRecentlyChanged": "includes/NativeFilesRecentlyChanged.php",
-		"NativeFilesRecentlyDeleted": "includes/NativeFilesRecentlyDeleted.php"
+		"NativeFileListUtils": "includes/NativeFileListUtils.php",
+		"S3Info": "includes/S3Info.php",
+		"SpecialNativeFilesRecentlyAdded": "includes/SpecialNativeFilesRecentlyAdded.php",
+		"SpecialNativeFilesRecentlyChanged": "includes/SpecialNativeFilesRecentlyChanged.php",
+		"SpecialNativeFilesRecentlyDeleted": "includes/SpecialNativeFilesRecentlyDeleted.php"
 	},
+	"config_prefix": "nfl",
 	"config": {
 		"NativeFileListEnableTalk": {
 			"description": "Enable the Talk feature for each file.",
@@ -26,16 +29,30 @@
 		"NativeFileListVandalizeEachPage": {
 			"description": "Write 'NativeFileList was here' on each page",
 			"value": false
+		},
+		"DBprefix": {
+			"description": "Prefix setting for the database name",
+			"value": "nfl_",
+			"public": true
+		},
+		"DBuser": {
+
+		},
+		"DBpassword": {
+
 		}
+	},
+	"ConfigRegistry": {
+		"NativeFileList": "GlobalVarConfig::newInstance"
 	},
 	"Hooks": {
 		"SpecialSearchResultsAppend": "MediaWiki\\Extension\\NativeFileList\\Hooks::onSpecialSearchResultsAppend",
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\NativeFileList\\Hooks::onLoadExtensionSchemaUpdates"
 	},
 	"SpecialPages": {
-		"NativeFilesRecentlyAdded": "NativeFilesRecentlyAdded",
-		"NativeFilesRecentlyChanged": "NativeFilesRecentlyChanged",
-		"NativeFilesRecentlyDeleted": "NativeFilesRecentlyDeleted"
+		"NativeFilesRecentlyAdded": "SpecialNativeFilesRecentlyAdded",
+		"NativeFilesRecentlyChanged": "SpecialNativeFilesRecentlyChanged",
+		"NativeFilesRecentlyDeleted": "SpecialNativeFilesRecentlyDeleted"
 	},
 	"AvailableRights": [
 		"nativefilelist-right"
@@ -46,7 +63,7 @@
 		]
 	},
 	"ExtensionMessagesFiles": {
-		"NativeFileListAlias": "i18n/NativeFileList.i18n.alias.php"
+		"NativeFileListAlias": "NativeFileList.i18n.alias.php"
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
